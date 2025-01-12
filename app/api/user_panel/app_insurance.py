@@ -1,47 +1,30 @@
-from datetime import datetime
+from http import HTTPStatus
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 
 from database.postgres import get_session, AsyncSession
-from service.common import get_rate, add_rate, delete_rate
-from models.rate import Rate
+from service import common
 
-router = APIRouter(prefix='/api/insurance',
-                   tags=['Панель пользователя - Раздел Страхование'])
+router = APIRouter(prefix='/api/human',
+                   tags=['Панель пользователя'])
 
 
-@router.get("/calculate",
-            summary="Получить калькуляцию",
-            description="Получить калькуляцию",
-            response_description="Получить калькуляцию"
+@router.get("/getPercent",
+            summary="Получить процент",
+            description="Получение процента",
+            response_description="Полученный процент"
             )
-def calculate_insurance(cargo_type: str, declared_value: float, date: str, session: AsyncSession = Depends(get_session)):
-    rate = get_rate(cargo_type, date, session)
-    if not rate:
-        return {"error": "Rate not found"}
-    return {"insurance_cost": declared_value * rate.rate}
+async def get_percent(audience1: str, audience2: str, session: AsyncSession = Depends(get_session)):
+    common.valid_request(audience1)
+    common.valid_request(audience2)
 
+    modified_text1 = common.add_quotes(audience1)
+    modified_text2 = common.add_quotes(audience2)
 
-@router.post("/rates/",
-             summary="Изменить ставку",
-             description="Изменить ставку",
-             response_description="Изменить ставку"
-             )
-def create_rate(cargo: Rate, session: AsyncSession = Depends(get_session)):
-    date_obj = datetime.strptime(cargo.date, "%Y-%m-%d").date()
+    try:
+        percent = await common.custom_query(modified_text1, modified_text2, session)
 
-    # Создаём новый объект для записи в базу данных
-    cargo_calculation = Rate(date=date_obj, cargo_type=cargo.cargo_type, rate=cargo.rate)
+        return {"percent": percent}
+    except Exception as e:
+        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=f"SQL Error: {str(e)}")
 
-    new_rate = add_rate(cargo.cargo_type, cargo.rate, session)
-    return new_rate
-
-
-@router.delete("/rates/{rate_id}",
-               summary="Удалить ставку",
-               description="Удалить ставку",
-               response_description="Удалить ставку"
-               )
-def remove_rate(rate_id: int, session: AsyncSession = Depends(get_session)):
-    delete_rate(rate_id, session)
-    return {"status": "deleted"}

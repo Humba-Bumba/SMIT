@@ -10,7 +10,6 @@ from config.settings import settings
 
 app = FastAPI(
     title=f"Read-only API для: {settings.project_name}",
-    description="SMIT тестовое",
     version="1.0.0",
     default_response_class=ORJSONResponse,
 )

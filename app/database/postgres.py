@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 
-from models.rate import Base
+from models.human import Base
 from config.settings import settings
 
 user = settings.postgres_user
@@ -13,7 +13,7 @@ db_name = settings.postgres_db
 
 DATABASE_URI = f'postgresql+asyncpg://{user}:{password}@{host}:{port}/{db_name}'
 engine = create_async_engine(DATABASE_URI, echo=True, future=True)
-async_session = sessionmaker(engine=engine, class_=AsyncSession, expire_on_commit=False)
+async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 sync_DATABASE_URI = f'postgresql://{user}:{password}@{host}:{port}/{db_name}'
 sync_engine = create_engine(sync_DATABASE_URI, echo=True, future=True)
