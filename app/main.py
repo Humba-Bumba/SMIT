@@ -15,12 +15,12 @@ app = FastAPI(
 )
 
 
-@app.on_event("startup")
-def startup():
-    init_db()
+# @app.on_event("startup")
+# def startup():
+#     init_db()
 
 
 app.include_router(app_insurance.router)
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8001)
+    uvicorn.run(app, host="0.0.0.0", port=80)

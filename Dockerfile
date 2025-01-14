@@ -1,13 +1,12 @@
 FROM python:3.10-slim
 
 WORKDIR /app
-COPY requirements.txt requirements.txt
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
 COPY app .
 
-RUN pip install --upgrade pip && \
-    pip install -r requirements.txt
+COPY wait-for-it.sh /app/wait-for-it.sh
+RUN chmod +x /app/wait-for-it.sh
 
-COPY app/config /app/config
-
-
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port=80"]
+ENTRYPOINT ["/app/wait-for-it.sh", "-s", "-t", "60", "pg_db:5432", "--", "python", "main.py"]

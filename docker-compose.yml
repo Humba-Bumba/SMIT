@@ -11,6 +11,8 @@ services:
       - "5432:5432"
     volumes:
       - ./database/pg_data:/var/lib/postgresql/data/
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./data1.csv:/docker-entrypoint-initdb.d/data1.csv
 
   pgadmin:
     image: dpage/pgadmin4
@@ -20,7 +22,7 @@ services:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: admin
     ports:
-      - "15432:81"
+      - "15432:80"
     depends_on:
       - pg_db
 
